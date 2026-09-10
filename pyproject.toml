@@ -1,0 +1,16 @@
+[project]
+name = "promptcheck"
+version = "0.1.0"
+description = "A lightweight library for evaluating LLM outputs against expected results"
+readme = "README.md"
+authors = [
+    { name = "priteesshhh", email = "WritetoPriteesh@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "pytest>=9.1.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.10,<0.13.0"]
+build-backend = "uv_build"
