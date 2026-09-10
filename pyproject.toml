@@ -1,5 +1,5 @@
 [project]
-name = "promptcheck"
+name = "evalquill"
 version = "0.1.0"
 description = "A lightweight library for evaluating LLM outputs against expected results"
 readme = "README.md"

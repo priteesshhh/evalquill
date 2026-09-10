@@ -1,5 +1,5 @@
 import pytest
-from promptcheck.metrics import normalized_exact_match, contains_substring
+from evalquill.metrics import normalized_exact_match, contains_substring
 
 
 # normalized_exact_match tests
