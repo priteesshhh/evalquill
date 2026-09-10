@@ -1,7 +1,7 @@
 import pytest
-from promptcheck import evaluate, evaluate_dataset, summary_scores, threshold_check
-from promptcheck.metrics import normalized_exact_match, contains_substring
-from promptcheck.llm import mock_llm
+from evalquill import evaluate, evaluate_dataset, summary_scores, threshold_check
+from evalquill.metrics import normalized_exact_match, contains_substring
+from evalquill.llm import mock_llm
 
 dataset = [
     {"prompt": "What is the capital of India?", "expected": "Delhi"},
@@ -34,7 +34,7 @@ print("\n--- Threshold Check ---")
 print(threshold_check(summary, thresholds))
 
 def test_duplicate_metric_names_rejected():
-    from promptcheck.metrics import normalized_exact_match
+    from evalquill.metrics import normalized_exact_match
     with pytest.raises(ValueError, match="Duplicate metric name"):
         evaluate("q", "a", "a", [normalized_exact_match, normalized_exact_match])
 

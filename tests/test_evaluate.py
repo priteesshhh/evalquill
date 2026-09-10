@@ -1,7 +1,7 @@
 import pytest
-from promptcheck import evaluate, evaluate_dataset, summary_scores, threshold_check
-from promptcheck.metrics import normalized_exact_match, contains_substring
-from promptcheck.llm import mock_llm
+from evalquill import evaluate, evaluate_dataset, summary_scores, threshold_check
+from evalquill.metrics import normalized_exact_match, contains_substring
+from evalquill.llm import mock_llm
 
 
 # evaluate() tests
