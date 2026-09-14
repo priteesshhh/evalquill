@@ -9,7 +9,13 @@ def evaluate(prompt: str, expected: str, response: str, metrics: list) -> dict:
 def evaluate_dataset(dataset: list, llm, metrics: list) -> list:
     _validate_metrics(metrics)
     results = []
+    seen_ids = set()
     for i, item in enumerate(dataset):
+        case_id = item.get("id", f"case_{i}")
+        if case_id in seen_ids:
+            raise ValueError(f"Duplicate case id: '{case_id}'. Each case must have a unique id.")
+        seen_ids.add(case_id)
+
         response = llm(item["prompt"])
         try:
             result = evaluate(
@@ -20,10 +26,11 @@ def evaluate_dataset(dataset: list, llm, metrics: list) -> list:
             )
         except Exception as e:
             raise RuntimeError(
-                f"Evaluation failed on case {i} "
+                f"Evaluation failed on case '{case_id}' "
                 f"(prompt: '{item['prompt']}') — {e}"
             ) from e
         results.append({
+            "id": case_id,
             "prompt": item["prompt"],
             "expected": item["expected"],
             "response": response,
