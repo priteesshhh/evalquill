@@ -106,5 +106,23 @@ def test_metric_error_gives_useful_context():
     def crashing_metric(response, expected):
         raise RuntimeError("something went wrong")
     dataset = [{"prompt": "What is 2+2?", "expected": "4"}]
-    with pytest.raises(RuntimeError, match="case 0"):
+    with pytest.raises(RuntimeError, match="case .case_0."):
         evaluate_dataset(dataset, mock_llm, [crashing_metric])
+
+def test_case_id_defaults_to_position():
+    dataset = [{"prompt": "What is 2 + 2?", "expected": "4"}]
+    results = evaluate_dataset(dataset, mock_llm, [contains_substring])
+    assert results[0]["id"] == "case_0"
+
+def test_case_id_uses_explicit_id():
+    dataset = [{"id": "math_basic", "prompt": "What is 2 + 2?", "expected": "4"}]
+    results = evaluate_dataset(dataset, mock_llm, [contains_substring])
+    assert results[0]["id"] == "math_basic"
+
+def test_duplicate_case_ids_rejected():
+    dataset = [
+        {"id": "dupe", "prompt": "What is 2 + 2?", "expected": "4"},
+        {"id": "dupe", "prompt": "What is 7 + 2?", "expected": "9"},
+    ]
+    with pytest.raises(ValueError, match="Duplicate case id"):
+        evaluate_dataset(dataset, mock_llm, [contains_substring])
