@@ -72,3 +72,59 @@ def test_compare_rejects_duplicate_ids_in_baseline():
     candidate = [_result("dupe", "x", {"m": 1.0})]
     with pytest.raises(ValueError, match="Duplicate case id"):
         compare(baseline, candidate)
+
+from evalquill.compare import diff_summary
+
+
+def test_diff_summary_counts_improved_and_regressed():
+    baseline = [
+        _result("up", "x", {"m": 0.0}),
+        _result("down", "y", {"m": 1.0}),
+        _result("same", "z", {"m": 1.0}),
+    ]
+    candidate = [
+        _result("up", "x2", {"m": 1.0}),
+        _result("down", "y2", {"m": 0.0}),
+        _result("same", "z", {"m": 1.0}),
+    ]
+    summary = diff_summary(compare(baseline, candidate))
+    assert summary["m"]["improved"] == ["up"]
+    assert summary["m"]["regressed"] == ["down"]
+
+
+def test_diff_summary_identifies_newly_failing():
+    baseline = [_result("c1", "x", {"m": 1.0})]
+    candidate = [_result("c1", "y", {"m": 0.0})]
+    summary = diff_summary(compare(baseline, candidate))
+    assert summary["m"]["newly_failing"] == ["c1"]
+
+
+def test_diff_summary_newly_failing_excludes_already_failing():
+    baseline = [_result("c1", "x", {"m": 0.0})]
+    candidate = [_result("c1", "y", {"m": 0.0})]
+    summary = diff_summary(compare(baseline, candidate))
+    assert summary["m"]["newly_failing"] == []
+
+
+def test_diff_summary_mean_can_rise_while_cases_break():
+    # mean improves, but one previously-passing case now fails
+    baseline = [
+        _result("a", "x", {"m": 1.0}),
+        _result("b", "y", {"m": 0.0}),
+        _result("c", "z", {"m": 0.0}),
+    ]
+    candidate = [
+        _result("a", "x2", {"m": 0.0}),
+        _result("b", "y2", {"m": 1.0}),
+        _result("c", "z2", {"m": 1.0}),
+    ]
+    summary = diff_summary(compare(baseline, candidate))
+    assert summary["m"]["mean_delta"] > 0
+    assert summary["m"]["newly_failing"] == ["a"]
+
+
+def test_diff_summary_respects_custom_threshold():
+    baseline = [_result("c1", "x", {"m": 0.9})]
+    candidate = [_result("c1", "y", {"m": 0.6})]
+    summary = diff_summary(compare(baseline, candidate), pass_threshold=0.8)
+    assert summary["m"]["newly_failing"] == ["c1"]
