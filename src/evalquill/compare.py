@@ -67,3 +67,36 @@ def compare(baseline: list, candidate: list) -> dict:
         "cases": cases,
         "metrics": sorted(base_metrics),
     }
+
+def diff_summary(diff: dict, pass_threshold: float = 1.0) -> dict:
+    summary = {}
+    for name in diff["metrics"]:
+        improved = []
+        regressed = []
+        newly_failing = []
+
+        for case in diff["cases"]:
+            delta = case["deltas"][name]
+            if delta > 0:
+                improved.append(case["id"])
+            elif delta < 0:
+                regressed.append(case["id"])
+
+            was_passing = case["baseline_scores"][name] >= pass_threshold
+            now_passing = case["candidate_scores"][name] >= pass_threshold
+            if was_passing and not now_passing:
+                newly_failing.append(case["id"])
+
+        baseline_mean = sum(c["baseline_scores"][name] for c in diff["cases"]) / len(diff["cases"])
+        candidate_mean = sum(c["candidate_scores"][name] for c in diff["cases"]) / len(diff["cases"])
+
+        summary[name] = {
+            "baseline_mean": baseline_mean,
+            "candidate_mean": candidate_mean,
+            "mean_delta": candidate_mean - baseline_mean,
+            "improved": improved,
+            "regressed": regressed,
+            "newly_failing": newly_failing,
+        }
+
+    return summary
