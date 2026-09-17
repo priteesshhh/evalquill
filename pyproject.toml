@@ -17,6 +17,9 @@ classifiers = [
 ]
 dependencies = []
 
+[project.optional-dependencies]
+openai = ["openai>=1.0"]
+
 [project.urls]
 Homepage = "https://github.com/priteesshhh/evalquill"
 Issues = "https://github.com/priteesshhh/evalquill/issues"
