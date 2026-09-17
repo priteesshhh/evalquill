@@ -56,3 +56,54 @@ def openai_llm(
     }
 
     return llm, metadata
+
+def gemini_llm(
+    model: str = "gemini-3.6-flash",
+    system_prompt: str | None = None,
+    temperature: float = 0.0,
+    client=None,
+    **kwargs,
+):
+    """Build an llm(prompt) -> str callable backed by the Gemini API.
+
+    Returns (llm, metadata). Requires GEMINI_API_KEY in the environment
+    when client is not injected.
+    """
+    if client is None:
+        try:
+            from google import genai
+        except ImportError as e:
+            raise ImportError(
+                "The google-genai package is required for gemini_llm. "
+                "Install it with: pip install google-genai"
+            ) from e
+        client = genai.Client()
+
+    def llm(prompt: str) -> str:
+        config = {"temperature": temperature, **kwargs}
+        if system_prompt is not None:
+            config["system_instruction"] = system_prompt
+
+        response = client.models.generate_content(
+            model=model,
+            contents=prompt,
+            config=config,
+        )
+
+        text = response.text
+        if text is None:
+            raise RuntimeError(
+                f"Model '{model}' returned no content. "
+                "This can happen when the response was filtered or truncated."
+            )
+        return text
+
+    metadata = {
+        "provider": "gemini",
+        "model": model,
+        "temperature": temperature,
+        "system_prompt": system_prompt,
+        **kwargs,
+    }
+
+    return llm, metadata

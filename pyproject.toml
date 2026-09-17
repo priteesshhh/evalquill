@@ -21,6 +21,9 @@ dependencies = []
 openai = [
     "openai>=1.0",
 ]
+gemini = [
+    "google-genai>=2.24.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/priteesshhh/evalquill"
