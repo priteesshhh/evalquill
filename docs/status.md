@@ -43,6 +43,21 @@ Unverified: that a successful response parses correctly, that
 choices[0].message.content is the right access path on this SDK version, and
 token usage per call.
 
+## CI and packaging - verified 2026-09-17
+
+GitHub Actions run 35279309174 passed both jobs on ubuntu-latest.
+
+offline tests: uv sync --locked --dev, then uv run pytest. 67 tests passed,
+2 live tests deselected. No extras installed, so this also confirms the core
+and the mocked adapter tests need no provider SDK.
+
+wheel install: uv build --no-sources, then the smoke script run against both
+distributions via uv run --isolated --no-project. Both imported evalquill
+from site-packages under the runner cache, confirming no reliance on the
+source tree, an editable install, or PYTHONPATH.
+
+No API keys are present in CI and no live calls are made.
+
 ## Case study - not started
 
 The demo in examples/prompt_change_demo.py uses stub LLMs and is synthetic.
