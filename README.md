@@ -12,17 +12,17 @@ evalquill compares two runs case by case and tells you which specific cases regr
 
 Not on PyPI yet.
 
-~~~bash
+```bash
 pip install git+https://github.com/priteesshhh/evalquill.git
-~~~
+```
 
 To work on it locally:
 
-~~~bash
+```bash
 git clone https://github.com/priteesshhh/evalquill.git
 cd evalquill
 uv sync
-~~~
+```
 
 ## Quickstart
 
@@ -30,7 +30,7 @@ A metric is a function taking the response and the expected value, returning a s
 
 This example uses two stub LLMs standing in for the same model under two different prompts. The second prompt says "answer in one word", which makes it spell out the number.
 
-~~~python
+```python
 from evalquill import evaluate_dataset
 from evalquill.metrics import contains_substring
 from evalquill.compare import compare, diff_summary
@@ -60,20 +60,20 @@ candidate = evaluate_dataset(dataset, llm_v2, [contains_substring])
 
 summary = diff_summary(compare(baseline, candidate))
 print(summary["contains_substring"])
-~~~
+```
 
-~~~
+```
 {'baseline_mean': 1.0,
  'candidate_mean': 0.6666666666666666,
  'mean_delta': -0.33333333333333337,
  'improved': [],
  'regressed': ['math_seven_two'],
  'newly_failing': ['math_seven_two']}
-~~~
+```
 
 The runnable version at `examples/prompt_change_demo.py` also prints the responses behind the regression:
 
-~~~
+```
 contains_substring
   mean: 1.00 -> 0.67 (-0.33)
   improved:      none
@@ -86,19 +86,19 @@ Regressed cases:
     expected:  9
     v1 said:   7 + 2 equals 9.
     v2 said:   nine
-~~~
+```
 
 ## Saving runs
 
 Runs can be saved and reloaded, so re-scoring or re-comparing doesn't mean paying for the same API calls again:
 
-~~~python
+```python
 from evalquill.storage import save_run, load_run
 
 save_run(baseline, "runs/baseline.json", metadata={"model": "gpt-4o-mini", "prompt_version": "v1"})
 stored = load_run("runs/baseline.json")
 compare(stored["results"], candidate)
-~~~
+```
 
 Metadata is free-form. Recording the model, its settings, and the prompt version is what makes a saved run interpretable weeks later.
 
@@ -133,9 +133,9 @@ Saved runs carry a schema version. Loading a file with a different version fails
 
 ## Tests
 
-~~~bash
+```bash
 uv run pytest tests/ -v
-~~~
+```
 
 ## License
 
