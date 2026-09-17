@@ -1,4 +1,4 @@
-def evaluate(prompt: str, expected: str, response: str, metrics: list) -> dict:
+def evaluate(expected: str, response: str, metrics: list) -> dict:
     _validate_metrics(metrics)
     results = {}
     for metric in metrics:
@@ -19,7 +19,6 @@ def evaluate_dataset(dataset: list, llm, metrics: list) -> list:
         response = llm(item["prompt"])
         try:
             result = evaluate(
-                prompt=item["prompt"],
                 expected=item["expected"],
                 response=response,
                 metrics=metrics

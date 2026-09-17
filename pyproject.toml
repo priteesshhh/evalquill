@@ -1,15 +1,33 @@
 [project]
 name = "evalquill"
 version = "0.1.0"
-description = "A lightweight library for evaluating LLM outputs against expected results"
+description = "Compare two LLM evaluation runs case by case to see which cases a prompt change broke"
 readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
 authors = [
-    { name = "priteesshhh", email = "WritetoPriteesh@gmail.com" }
+    { name = "Priteesh Karra", email = "WritetoPriteesh@gmail.com" }
 ]
-requires-python = ">=3.14"
-dependencies = [
-    "pytest>=9.1.1",
+keywords = ["llm", "evaluation", "prompt-engineering", "testing"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Testing",
 ]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/priteesshhh/evalquill"
+Issues = "https://github.com/priteesshhh/evalquill/issues"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [build-system]
 requires = ["uv_build>=0.12.10,<0.13.0"]
