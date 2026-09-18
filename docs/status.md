@@ -16,32 +16,36 @@ Two failures preceded it, both environmental rather than code defects:
 
 8 offline unit tests cover the adapter against an injected fake client.
 
-## OpenAI adapter - live verification pending
+## OpenAI adapter - live verified 2026-09-18
 
-8 offline unit tests passing against an injected fake client: message
-construction, system prompt handling, default temperature, kwarg passthrough,
-metadata, None-content handling, error propagation.
+Environment: openai SDK 3.14.1, Python 3.14.4, model gpt-4o-mini.
 
-Live verification NOT completed. Attempted 2026-09-17 with openai SDK 3.14.1
-and model gpt-4o-mini.
+Smoke test passed. Prompt "Reply with exactly the word: pong" returned 'pong'.
+Metadata recorded provider, model, temperature, system prompt and max_tokens.
+choices[0].message.content confirmed as the correct access path on this SDK
+version.
 
-First attempt failed before reaching the API with an illegal header value,
-caused by a trailing newline in OPENAI_API_KEY. Environment problem, not a
-code defect.
+Token usage for a minimal call: 14 prompt, 1 completion, 15 total.
 
-Second attempt reached the API and was rejected on billing:
+Earlier attempt on 2026-09-17 failed on billing (HTTP 429,
+code: insufficient_quota) with an exhausted credit balance, and before that on
+a malformed auth header caused by a trailing newline in OPENAI_API_KEY. Both
+were environmental, not code defects.
 
-    HTTP 429
-    type: insufficient_quota
-    code: credit_balance_exhausted
+8 offline unit tests cover the adapter against an injected fake client.
 
-Established: client construction, authentication, and the
-chat.completions.create call signature work against SDK 3.14.1. API errors
-propagate as exceptions rather than becoming scores.
+## Retry policy - offline verified 2026-09-18
 
-Unverified: that a successful response parses correctly, that
-choices[0].message.content is the right access path on this SDK version, and
-token usage per call.
+case_study/retry.py classifies failures by structured SDK exception type and
+error.code, never by substring matching on the message. Quota and billing
+codes stop immediately; transient rate limits and server errors retry to a
+total of 3 attempts including the first. Retry-After is honoured when present.
+The OpenAI client is constructed with max_retries=0 so SDK retries do not
+multiply the wrapper's budget.
+
+10 offline tests cover this, including a regression test asserting that an
+error whose message text contains "503" and "insufficient_quota" is not
+classified from those substrings.
 
 ## CI and packaging - verified 2026-09-17
 

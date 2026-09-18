@@ -11,3 +11,6 @@ wheels/
 .DS_Store
 runs/
 dist/
+.env
+.env.*
+*.key
