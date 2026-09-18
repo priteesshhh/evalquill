@@ -1,0 +1,58 @@
+# Labels
+# One label per ticket: billing account integration feature bug other
+# NEEDS_REVIEW if no clear primary request.
+# Labeled by hand against case_study/labeling_guide.md
+# Labeler: Priteesh Karra
+# Date: 17 September 2026
+
+id,label
+t01,account
+t02,feature
+t03,billing
+t04,integration
+t05,bug
+t06,billing
+t07,feature
+t08,account
+t09,integration
+t10,bug
+t11,billing
+t12,account
+t13,other
+t14,bug
+t15,integration
+t16,billing
+t17,bug
+t18,integration
+t19,account
+t20,billing
+t21,bug
+t22,other
+t23,integration
+t24,account
+t25,bug
+t26,feature
+t27,billing
+t28,integration
+t29,bug
+t30,other
+t31,integration
+t32,bug
+t33,billing
+t34,account
+t35,bug
+t36,billing
+t37,feature
+t38,integration
+t39,bug
+t40,billing
+t41,bug
+t42,integration
+t43,bug
+t44,account
+t45,bug
+t46,other
+t47,account
+t48,bug
+t49,billing
+t50,integration
