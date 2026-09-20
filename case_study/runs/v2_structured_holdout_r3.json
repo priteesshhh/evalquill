@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-09-20T02:58:39.680666+00:00",
+  "metadata": {
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "temperature": 0.0,
+    "system_prompt": "Classify this support ticket into exactly one category.\n\nClassify by the requested resolution - what the user wants to happen - not by\nthe technical cause.\n\nApply these categories in order. The first three take priority over bug and\nfeature:\n\n1. billing - charges, refunds, invoices, subscription changes. Applies even\n   when a software bug caused the problem.\n2. account - login, passwords, permissions, profile. Applies even when the\n   failure is a server error. A login 500 is account.\n3. integration - third-party connections, API access, webhooks. Applies even\n   when something is broken.\n4. feature - a request for a new built-in capability that does not exist.\n   Excludes anything covered by 1-3.\n5. bug - an existing built-in capability that fails. Only after billing,\n   account and integration have been ruled out.\n6. other - a clear request falling outside all five.\n\nReply with exactly one word from this list and nothing else:\nbilling, account, integration, feature, bug, other",
+    "max_tokens": 10,
+    "prompt_version": "v2_structured",
+    "split": "holdout",
+    "repeat": "3",
+    "sdk_max_retries": 0,
+    "seconds_between_calls": 1.0,
+    "labels_sha256": "88a9b63e74f0b743b81aff289ad7118c937e6dbd9313fb81a005d69910c25a08",
+    "tickets_sha256": "7607171fecf2285937340cbfca5122df9c960182b9e87f868d101750d0298f92",
+    "incomplete": false
+  },
+  "results": [
+    {
+      "id": "t01",
+      "prompt": "I've been trying to reset my password for twenty minutes. The reset email never arrives. I've checked spam.",
+      "expected": "account",
+      "response": "account",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t02",
+      "prompt": "Can you add a dark mode? Staring at this all day is rough.",
+      "expected": "feature",
+      "response": "feature",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t05",
+      "prompt": "Clicking \"Save\" on the settings page does nothing. No error, no confirmation, nothing happens.",
+      "expected": "bug",
+      "response": "bug",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t12",
+      "prompt": "Someone on my team can still access the workspace after I removed them.",
+      "expected": "account",
+      "response": "account",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t15",
+      "prompt": "Your API rate limit documentation says 100/min but we're getting throttled at around 60.",
+      "expected": "integration",
+      "response": "integration",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t17",
+      "prompt": "The mobile app crashes when I open a record with more than about 50 attachments.",
+      "expected": "bug",
+      "response": "bug",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t18",
+      "prompt": "Can we get SSO with Okta? Our security team is asking.",
+      "expected": "integration",
+      "response": "integration",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t19",
+      "prompt": "My profile picture won't update. Upload seems to succeed but the old one stays.",
+      "expected": "account",
+      "response": "account",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t25",
+      "prompt": "Timestamps display in UTC regardless of what I set in preferences.",
+      "expected": "bug",
+      "response": "bug",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t26",
+      "prompt": "We need a way to tag records with multiple categories. Right now it's one per record.",
+      "expected": "feature",
+      "response": "feature",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t29",
+      "prompt": "Undo doesn't work after a bulk edit. Loses everything.",
+      "expected": "bug",
+      "response": "bug",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t31",
+      "prompt": "The Slack integration posts to the wrong channel after we renamed it.",
+      "expected": "integration",
+      "response": "integration",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t32",
+      "prompt": "Report totals don't match what's on screen. Off by a few percent, varies.",
+      "expected": "bug",
+      "response": "bug",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t33",
+      "prompt": "Is there an educational discount? I teach at a university.",
+      "expected": "billing",
+      "response": "billing",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t34",
+      "prompt": "Locked out after too many failed attempts. How long until it resets?",
+      "expected": "account",
+      "response": "account",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t35",
+      "prompt": "Attachments over 10MB fail silently. No error message, file just isn't there.",
+      "expected": "bug",
+      "response": "bug",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t37",
+      "prompt": "Would love to see keyboard shortcuts for the common actions.",
+      "expected": "feature",
+      "response": "feature",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t45",
+      "prompt": "The print layout cuts off the right side of wide tables.",
+      "expected": "bug",
+      "response": "bug",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    },
+    {
+      "id": "t47",
+      "prompt": "Invited a colleague three days ago, they never got the email.",
+      "expected": "account",
+      "response": "integration",
+      "scores": {
+        "normalized_exact_match": 0.0
+      }
+    },
+    {
+      "id": "t48",
+      "prompt": "Bulk import failed at row 2300 of 5000 and didn't tell me which rows succeeded.",
+      "expected": "bug",
+      "response": "bug",
+      "scores": {
+        "normalized_exact_match": 1.0
+      }
+    }
+  ]
+}

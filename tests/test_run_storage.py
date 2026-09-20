@@ -36,8 +36,17 @@ class _Chat:
 class _Client:
     def __init__(self, **kw): self.chat = _Chat()
 
-import openai
-openai.OpenAI = _Client
+# Install a stand-in openai module. The real SDK is an optional extra and is
+# not installed in CI, so importing it here would make these tests depend on
+# something the core does not require.
+import types
+fake = types.ModuleType("openai")
+fake.OpenAI = _Client
+class _Err(Exception): pass
+fake.RateLimitError = type("RateLimitError", (_Err,), {})
+fake.InternalServerError = type("InternalServerError", (_Err,), {})
+fake.APIConnectionError = type("APIConnectionError", (_Err,), {})
+sys.modules["openai"] = fake
 
 import run
 run.SECONDS_BETWEEN_CALLS = 0
