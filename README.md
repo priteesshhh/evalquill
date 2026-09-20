@@ -114,7 +114,8 @@ Runs covering different cases, or using different metrics, are rejected rather t
 
 - No semantic or model-graded metrics. The built-ins are string comparisons, named for what they actually check: `normalized_exact_match` ignores case and surrounding whitespace, `contains_substring` checks for a substring and nothing more. `contains_substring("19", "9")` returns 1.0 - correct for a substring check, wrong if you read it as answer correctness.
 - No RAG metrics. Metrics receive only the response and the expected value, so anything needing retrieved context doesn't fit the signature yet.
-- No provider adapters. Bring your own callable.
+- Two provider adapters, both optional extras: OpenAI and Gemini. The core
+  has no runtime dependencies and takes any `llm(prompt) -> str` callable.
 - No dashboard, no hosted anything.
 
 This isn't the only tool in this space. promptfoo, DeepEval, LangSmith and Braintrust all overlap with it and most do more.
@@ -140,6 +141,20 @@ uv run pytest tests/ -v
 ## License
 
 MIT
+
+## Case study
+
+[case_study/](case_study/) contains a worked example: 50 fictional support
+tickets, hand-labeled against a written guide, classified by gpt-4o-mini
+under two prompt versions over three repeats.
+
+Accuracy rose from 80% to 95% on the held-out set, and one previously
+correct ticket failed in all three observed repeats. The aggregate score
+does not surface that; the per-case comparison does.
+
+All runs are saved, so the results can be re-scored and re-compared with no
+API key. See [case_study/README.md](case_study/README.md) for method,
+results and limitations.
 
 ## Status
 
