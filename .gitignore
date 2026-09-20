@@ -9,7 +9,7 @@ wheels/
 # Virtual environments
 .venv
 .DS_Store
-runs/
+/runs/
 dist/
 .env
 .env.*
