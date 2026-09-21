@@ -1,3 +1,6 @@
+import math
+
+
 def evaluate(expected: str, response: str, metrics: list) -> dict:
     _validate_metrics(metrics)
     results = {}
@@ -6,6 +9,8 @@ def evaluate(expected: str, response: str, metrics: list) -> dict:
         _validate_score(score, metric.__name__)
         results[metric.__name__] = score
     return results
+
+
 def evaluate_dataset(dataset: list, llm, metrics: list) -> list:
     _validate_metrics(metrics)
     results = []
@@ -36,26 +41,62 @@ def evaluate_dataset(dataset: list, llm, metrics: list) -> list:
             "scores": result
         })
     return results
+
+
 def summary_scores(results: list) -> dict:
+    """Mean of each metric across results, at full precision.
+
+    Every row must carry the same metric set with valid scores. A row missing
+    a metric is rejected rather than averaged as zero.
+    """
     if not results:
         return {}
-    
+
+    metric_set = None
     totals = {}
-    for result in results:
-        for metric_name, score in result["scores"].items():
-            if metric_name not in totals:
-                totals[metric_name] = 0.0
-            totals[metric_name] += score
-    
-    return {metric: total / len(results) for metric, total in totals.items()}
+    for index, result in enumerate(results):
+        if not isinstance(result, dict) or not isinstance(result.get("scores"), dict):
+            raise ValueError(f"Result {index} has no scores dict.")
+        scores = result["scores"]
+
+        names = set(scores)
+        if metric_set is None:
+            metric_set = names
+        elif names != metric_set:
+            raise ValueError(
+                f"Inconsistent metric sets: result 0 has {sorted(metric_set)}, "
+                f"result {index} has {sorted(names)}. A missing score would "
+                "otherwise be averaged as zero."
+            )
+
+        for name, score in scores.items():
+            _validate_score(score, name)
+            totals[name] = totals.get(name, 0.0) + score
+
+    return {name: total / len(results) for name, total in totals.items()}
+
+
 def threshold_check(summary: dict, thresholds: dict) -> dict:
+    """PASS, FAIL or NOT RUN per threshold.
+
+    NOT RUN means the metric was never measured. Invalid thresholds or
+    summary values are rejected rather than compared.
+    """
+    for metric, minimum in thresholds.items():
+        try:
+            _validate_score(minimum, metric)
+        except ValueError as e:
+            raise ValueError(f"Invalid threshold for '{metric}': {e}") from e
+
     results = {}
     for metric, minimum in thresholds.items():
         if metric not in summary:
             results[metric] = "NOT RUN"
-        else:
-            results[metric] = "PASS" if summary[metric] >= minimum else "FAIL"
+            continue
+        _validate_score(summary[metric], metric)
+        results[metric] = "PASS" if summary[metric] >= minimum else "FAIL"
     return results
+
 
 def _validate_metrics(metrics: list) -> None:
     seen = set()
@@ -64,12 +105,12 @@ def _validate_metrics(metrics: list) -> None:
             raise ValueError(f"Duplicate metric name: '{metric.__name__}'. Each metric must have a unique name.")
         seen.add(metric.__name__)
 
+
 def _validate_score(value: float, name: str) -> None:
     if isinstance(value, bool):
         raise ValueError(f"Score '{name}' must be a float, not a boolean.")
     if not isinstance(value, (int, float)):
         raise ValueError(f"Score '{name}' must be a number, got {type(value).__name__}.")
-    import math
     if math.isnan(value) or math.isinf(value):
         raise ValueError(f"Score '{name}' must be finite, got {value}.")
     if not (0.0 <= value <= 1.0):
