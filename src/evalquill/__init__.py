@@ -11,17 +11,58 @@ def evaluate(expected: str, response: str, metrics: list) -> dict:
     return results
 
 
-def evaluate_dataset(dataset: list, llm, metrics: list) -> list:
-    _validate_metrics(metrics)
-    results = []
-    seen_ids = set()
-    for i, item in enumerate(dataset):
-        case_id = item.get("id", f"case_{i}")
-        if case_id in seen_ids:
-            raise ValueError(f"Duplicate case id: '{case_id}'. Each case must have a unique id.")
-        seen_ids.add(case_id)
+def _preflight(dataset, metrics) -> list:
+    """Validate the whole dataset and metric list; return the case ids.
 
-        response = llm(item["prompt"])
+    Runs before any model call, so a structural error anywhere in the
+    dataset costs nothing.
+    """
+    _validate_metrics(metrics)
+    if not isinstance(dataset, list):
+        raise ValueError(f"dataset must be a list of cases, got {type(dataset).__name__}.")
+
+    ids = []
+    seen = set()
+    for i, item in enumerate(dataset):
+        if not isinstance(item, dict):
+            raise ValueError(f"Case {i} is not a dict, got {type(item).__name__}.")
+        missing = [f for f in ("prompt", "expected") if f not in item]
+        if missing:
+            raise ValueError(f"Case {i} is missing required field(s): {missing}.")
+        for field in ("prompt", "expected"):
+            if not isinstance(item[field], str):
+                raise ValueError(
+                    f"Case {i}: '{field}' must be a string, got {type(item[field]).__name__}."
+                )
+        case_id = item.get("id", f"case_{i}")
+        if case_id in seen:
+            raise ValueError(f"Duplicate case id: '{case_id}'. Each case must have a unique id.")
+        seen.add(case_id)
+        ids.append(case_id)
+    return ids
+
+
+def evaluate_dataset(dataset: list, llm, metrics: list) -> list:
+    """Call llm on each case and score the response.
+
+    The dataset and metrics are validated in full before the first call.
+    LLM and metric failures are re-raised as RuntimeError naming the case;
+    the original exception is available as __cause__.
+    """
+    ids = _preflight(dataset, metrics)
+
+    results = []
+    for case_id, item in zip(ids, dataset):
+        try:
+            response = llm(item["prompt"])
+        except Exception as e:
+            raise RuntimeError(f"LLM call failed on case '{case_id}' — {e}") from e
+
+        if not isinstance(response, str):
+            raise RuntimeError(
+                f"LLM returned {type(response).__name__} for case '{case_id}'; expected a string."
+            )
+
         try:
             result = evaluate(
                 expected=item["expected"],
@@ -33,6 +74,7 @@ def evaluate_dataset(dataset: list, llm, metrics: list) -> list:
                 f"Evaluation failed on case '{case_id}' "
                 f"(prompt: '{item['prompt']}') — {e}"
             ) from e
+
         results.append({
             "id": case_id,
             "prompt": item["prompt"],
@@ -98,12 +140,19 @@ def threshold_check(summary: dict, thresholds: dict) -> dict:
     return results
 
 
-def _validate_metrics(metrics: list) -> None:
+def _validate_metrics(metrics) -> None:
+    if not isinstance(metrics, (list, tuple)) or not metrics:
+        raise ValueError("At least one metric is required; a run without metrics measures nothing.")
     seen = set()
     for metric in metrics:
-        if metric.__name__ in seen:
-            raise ValueError(f"Duplicate metric name: '{metric.__name__}'. Each metric must have a unique name.")
-        seen.add(metric.__name__)
+        if not callable(metric):
+            raise ValueError(f"Each metric must be callable, got {type(metric).__name__}.")
+        name = getattr(metric, "__name__", None)
+        if not isinstance(name, str):
+            raise ValueError("Each metric must have a __name__; use a named function.")
+        if name in seen:
+            raise ValueError(f"Duplicate metric name: '{name}'. Each metric must have a unique name.")
+        seen.add(name)
 
 
 def _validate_score(value: float, name: str) -> None:
