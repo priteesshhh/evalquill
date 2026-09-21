@@ -9,54 +9,12 @@ are rejected rather than compared.
 """
 
 from . import _validate_score
-
-REQUIRED_FIELDS = ("id", "prompt", "expected", "response", "scores")
-
-
-def _check_row(row, label: str, index: int) -> None:
-    if not isinstance(row, dict):
-        raise ValueError(f"{label} row {index} is not a dict.")
-    missing = [f for f in REQUIRED_FIELDS if f not in row]
-    if missing:
-        raise ValueError(f"{label} row {index} is missing required field(s): {missing}.")
-    if not isinstance(row["scores"], dict):
-        raise ValueError(f"{label} case '{row['id']}': scores must be a dict.")
-    for name, value in row["scores"].items():
-        try:
-            _validate_score(value, name)
-        except ValueError as e:
-            raise ValueError(f"{label} case '{row['id']}': {e}") from e
-
-
-def _validate_run(results: list, label: str):
-    """Validate every row; return (rows indexed by id, the run's metric set)."""
-    if not results:
-        raise ValueError("Both runs must contain at least one case.")
-
-    indexed = {}
-    metric_set = None
-    first_id = None
-    for index, row in enumerate(results):
-        _check_row(row, label, index)
-        case_id = row["id"]
-        if case_id in indexed:
-            raise ValueError(f"Duplicate case id '{case_id}' in {label} run.")
-        indexed[case_id] = row
-
-        names = set(row["scores"])
-        if metric_set is None:
-            metric_set, first_id = names, case_id
-        elif names != metric_set:
-            raise ValueError(
-                f"{label} run has inconsistent metric sets: case '{first_id}' "
-                f"has {sorted(metric_set)}, case '{case_id}' has {sorted(names)}."
-            )
-    return indexed, metric_set
+from .validation import validate_results
 
 
 def compare(baseline: list, candidate: list) -> dict:
-    base_idx, base_metrics = _validate_run(baseline, "baseline")
-    cand_idx, cand_metrics = _validate_run(candidate, "candidate")
+    base_idx, base_metrics = validate_results(baseline, "baseline")
+    cand_idx, cand_metrics = validate_results(candidate, "candidate")
 
     if base_idx.keys() != cand_idx.keys():
         only_base = sorted(base_idx.keys() - cand_idx.keys())

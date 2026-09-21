@@ -6,23 +6,28 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .validation import validate_results
+
 SCHEMA_VERSION = 1
 
 
 def save_run(results: list, path: str, metadata: dict | None = None) -> None:
     """Write a run to path atomically.
 
-    The payload is serialized in full before the filesystem is touched, then
-    written to a temporary file in the same directory and moved onto path
-    with os.replace. A failure at any stage leaves an existing file at path
-    unchanged and leaves no partial file behind. An existing file at path is
-    replaced on success.
+    Rows are validated before anything is written. The payload is then
+    serialized in full, written to a temporary file in the same directory,
+    and moved onto path with os.replace. A failure at any stage leaves an
+    existing file at path unchanged and leaves no partial file behind. An
+    existing file at path is replaced on success.
 
     Non-finite floats (NaN, infinity) are rejected, since they are not valid
     JSON.
     """
     if not results:
         raise ValueError("Cannot save an empty run.")
+    if metadata is not None and not isinstance(metadata, dict):
+        raise ValueError("metadata must be a dict.")
+    validate_results(results, "run")
 
     payload = {
         "schema_version": SCHEMA_VERSION,
@@ -55,14 +60,25 @@ def save_run(results: list, path: str, metadata: dict | None = None) -> None:
 
 
 def load_run(path: str) -> dict:
+    """Load a run and validate its envelope and every row.
+
+    A matching schema_version is necessary but not sufficient: the file must
+    also contain valid metadata and a non-empty list of valid result rows.
+    """
     target = Path(path)
     if not target.exists():
         raise FileNotFoundError(f"No run found at '{path}'.")
 
-    with target.open(encoding="utf-8") as f:
-        payload = json.load(f)
+    def reject_constant(token):
+        raise ValueError(f"'{path}' contains non-standard JSON value {token}.")
 
-    if "schema_version" not in payload:
+    with target.open(encoding="utf-8") as f:
+        try:
+            payload = json.load(f, parse_constant=reject_constant)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"'{path}' is not valid JSON: {e}") from e
+
+    if not isinstance(payload, dict) or "schema_version" not in payload:
         raise ValueError(f"'{path}' is not an evalquill run file.")
 
     if payload["schema_version"] != SCHEMA_VERSION:
@@ -71,4 +87,15 @@ def load_run(path: str) -> dict:
             f"but this version of evalquill reads version {SCHEMA_VERSION}."
         )
 
+    for field in ("created_at", "metadata", "results"):
+        if field not in payload:
+            raise ValueError(f"'{path}' is missing required field '{field}' (results cannot be read).")
+    if not isinstance(payload["created_at"], str):
+        raise ValueError(f"'{path}': 'created_at' must be a string.")
+    if not isinstance(payload["metadata"], dict):
+        raise ValueError(f"'{path}': 'metadata' must be a dict.")
+    if not isinstance(payload["results"], list):
+        raise ValueError(f"'{path}': 'results' must be a list.")
+
+    validate_results(payload["results"], f"'{path}'")
     return payload
