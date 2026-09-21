@@ -155,8 +155,10 @@ accuracy would not surface it.
 
 - 20 held-out tickets is a small sample. A single ticket is 5 percentage
   points.
-- Category coverage in the holdout is uneven: only two `feature` and two
-  `other` tickets. Nothing can be concluded about those categories.
+- Category coverage in the holdout is uneven. Of the 20 held-out tickets:
+  8 bug, 5 account, 3 feature, 3 integration, 1 billing, 0 other. The
+  results say nothing about `other` and almost nothing about `billing`;
+  the headline accuracy covers five of the six categories.
 - One model, one configuration: gpt-4o-mini at temperature 0.0. Results may
   not transfer to other models, temperatures or providers.
 - All six runs were made within a short window on 2026-09-20, against the
