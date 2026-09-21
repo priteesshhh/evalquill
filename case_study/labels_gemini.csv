@@ -1,7 +1,8 @@
-# Independent second-labeler pass
-# Model: gemini-3.6-flash
-# Prompt: verbatim from case_study/labeling_guide.md
-# Date: 18 September 2026
+# Second labeling pass (Gemini)
+# Model version and interface: not recorded
+# Prompt: a condensed restatement of case_study/labeling_guide.md
+#   (rules and precedence order, without worked examples)
+# Raw model responses: not saved; only the resulting labels are recorded
 
 id,label
 t01,account

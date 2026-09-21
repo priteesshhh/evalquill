@@ -146,7 +146,8 @@ MIT
 
 [case_study/](case_study/) contains a worked example: 50 fictional support
 tickets, hand-labeled against a written guide, classified by gpt-4o-mini
-under two prompt versions over three repeats.
+under two prompt versions. Results are reported on a frozen 20-ticket
+held-out set, with three repeats per version on that set.
 
 Accuracy rose from 80% to 95% on the held-out set, and one previously
 correct ticket failed in all three observed repeats. The aggregate score

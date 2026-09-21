@@ -9,8 +9,10 @@ Single smoke test passed. Prompt "Reply with exactly the word: pong" returned
 
 Two failures preceded it, both environmental rather than code defects:
 
-- 404 NOT_FOUND on gemini-2.5-flash. That model is no longer available to new
-  users; the API response named gemini-3.6-flash as the replacement.
+- 404 NOT_FOUND on gemini-2.5-flash. The API response for this project said
+  the model was not available to new users and named gemini-3.6-flash as the
+  replacement. That is one project's response, not a general availability
+  claim.
 - 503 UNAVAILABLE on first attempt with the corrected model. Transient
   capacity, succeeded on retry.
 
@@ -39,7 +41,8 @@ were environmental, not code defects.
 case_study/retry.py classifies failures by structured SDK exception type and
 error.code, never by substring matching on the message. Quota and billing
 codes stop immediately; transient rate limits and server errors retry to a
-total of 3 attempts including the first. Retry-After is honoured when present.
+total of 3 attempts including the first. A numeric Retry-After value is
+honoured; the HTTP-date form is ignored and negative values are not rejected.
 The OpenAI client is constructed with max_retries=0 so SDK retries do not
 multiply the wrapper's budget.
 
@@ -47,9 +50,12 @@ multiply the wrapper's budget.
 error whose message text contains "503" and "insufficient_quota" is not
 classified from those substrings.
 
-## CI and packaging - verified 2026-09-17
+## CI and packaging
 
-GitHub Actions run 35279309174 passed both jobs on ubuntu-latest.
+Current: GitHub Actions run 35618939579 passed both jobs for commit 38abed9.
+The same commit runs 163 offline tests locally, with 2 live tests deselected.
+
+Historical, 2026-09-17: run 35279309174 passed both jobs on ubuntu-latest.
 
 offline tests: uv sync --locked --dev, then uv run pytest. 67 tests passed,
 2 live tests deselected. No extras installed, so this also confirms the core
@@ -62,7 +68,12 @@ source tree, an editable install, or PYTHONPATH.
 
 No API keys are present in CI and no live calls are made.
 
-## Case study - not started
+## Case study - complete
+
+Method, results and limitations are in case_study/README.md. Six holdout
+runs (three per prompt version) and two train runs are saved in
+case_study/runs/. case_study/rescore.py recomputes all 180 stored scores from
+the saved responses; at commit 38abed9 every score matched.
 
 The demo in examples/prompt_change_demo.py uses stub LLMs and is synthetic.
 It illustrates the comparison workflow. It is not evidence about any real

@@ -30,14 +30,17 @@ problem caused by a defect is billing; a login 500 is account.
 Labels were assigned by hand by the author against the guide, before any
 prompt was written or any model output seen: [labels.csv](labels.csv)
 
-They were then reviewed by an independent second-labeler pass: gemini-3.6-flash,
-given the guide verbatim, labeling the same tickets without access to the
-author's labels. The two agreed on 50/50: [labels_gemini.csv](labels_gemini.csv)
+They were then checked by a second labeling pass: the author gave Gemini a
+condensed restatement of the guide's rules and precedence order (without its
+worked examples) and the ticket texts, but not the author's labels. The model
+version and interface were not recorded and the raw responses were not saved;
+the file preserves only the resulting labels. The two label sets agreed on
+50/50: [labels_gemini.csv](labels_gemini.csv)
 
-This indicates the guide's rules were applied consistently by two labelers.
-It does not establish that the labels are correct. Both labelers followed the
-same decision procedure, so the agreement measures whether the rules are
-deterministic, not whether they carve the space well.
+The two label sets agree on this dataset. That is evidence the guide can be
+applied consistently, not proof that it always yields a single answer, and it
+does not establish that the labels are correct: both labelers followed the
+same written procedure.
 
 ### Split
 
@@ -161,24 +164,35 @@ accuracy would not surface it.
   the headline accuracy covers five of the six categories.
 - One model, one configuration: gpt-4o-mini at temperature 0.0. Results may
   not transfer to other models, temperatures or providers.
-- All six runs were made within a short window on 2026-09-20, against the
-  same serving infrastructure. Stability over minutes is not stability over
-  model versions, load conditions, or time.
+- All six holdout runs were made within a short window on 2026-09-20 with
+  the same requested model name and settings. The backend model version and
+  serving conditions were not recorded. Stability within one window is not
+  stability over model versions, load conditions, or time.
 - Three repeats do not establish statistical significance or reliability.
   Sampling effects have not been conclusively ruled out; the repeats show
   that the observed outputs recurred under these conditions, nothing more.
-- Runs do not record per-request identifiers or token usage, so response
-  caching upstream cannot be distinguished from genuine determinism.
-  Capturing that metadata is a future improvement.
+- Runs do not record request identifiers, the model version actually served,
+  finish reasons, or token usage. Recording them would improve traceability.
+  It would not by itself prove deterministic generation or rule out every
+  intermediate cache, and nothing in these artifacts suggests caching
+  produced the identical responses.
 - The tickets are fictional and written by the same author who wrote the
   labeling guide.
 
 ## Reproduction
 
-The saved runs contain every prompt, response, label and score, so scoring
-and comparison need no API access and no API key.
+The saved runs contain every prompt, response, label and score. Nothing in
+this section needs an API key.
+
+Recompute every stored score from the saved response and expected answer,
+reporting any mismatch (exits non-zero if one is found):
 
     uv sync --locked --dev
+    uv run case_study/rescore.py
+
+Summarize and compare the stored scores. These read the scores saved in each
+run; they do not recompute them:
+
     uv run case_study/repeats.py
     uv run case_study/compare_runs.py \
       case_study/runs/v1_naive_holdout.json \
