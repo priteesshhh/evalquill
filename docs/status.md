@@ -52,8 +52,11 @@ classified from those substrings.
 
 ## CI and packaging
 
-Current: GitHub Actions run 35618939579 passed both jobs for commit 38abed9.
-The same commit runs 163 offline tests locally, with 2 live tests deselected.
+Current: GitHub Actions run 35736820917 passed all four jobs for commit
+4a2e42d: offline tests and wheel install, each on Python 3.10 and 3.14. Each
+job asserts the interpreter it ran (3.10.21 and 3.14.7 in that run), so the
+matrix cannot silently fall back to a single version. The suite has 180
+offline tests, with 2 live tests deselected.
 
 Historical, 2026-09-17: run 35279309174 passed both jobs on ubuntu-latest.
 
@@ -78,3 +81,9 @@ the saved responses; at commit 38abed9 every score matched.
 The demo in examples/prompt_change_demo.py uses stub LLMs and is synthetic.
 It illustrates the comparison workflow. It is not evidence about any real
 model's behaviour.
+
+## Release 0.1.0 - in preparation
+
+Prepared on branch release/0.1.0 and not yet published. Pending: a
+TestPyPI upload and install, and a clean install on a second machine.
+The release tag will point to the commit that passes those checks.

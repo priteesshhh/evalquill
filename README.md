@@ -12,17 +12,15 @@ evalquill compares two runs case by case and tells you which specific cases got 
 
 Requires Python 3.10 or later. The core has no runtime dependencies.
 
-It is not on PyPI yet, so install from GitHub (this needs git):
-
 ```bash
-pip install git+https://github.com/priteesshhh/evalquill.git
+pip install evalquill
 ```
 
 The OpenAI and Gemini adapters are optional extras:
 
 ```bash
-pip install "evalquill[openai] @ git+https://github.com/priteesshhh/evalquill.git"
-pip install "evalquill[gemini] @ git+https://github.com/priteesshhh/evalquill.git"
+pip install "evalquill[openai]"
+pip install "evalquill[gemini]"
 ```
 
 To work on it locally:
@@ -189,11 +187,11 @@ Two runs are rejected rather than compared if they cover different cases, use di
 
 ## Case study
 
-[case_study/](case_study/) contains a worked example: 50 fictional support tickets, hand-labeled against a written guide, classified by gpt-4o-mini under two prompt versions. Results are reported on a frozen 20-ticket held-out set, with three repeats per version on that set.
+[case_study/](https://github.com/priteesshhh/evalquill/tree/v0.1.0/case_study) contains a worked example: 50 fictional support tickets, hand-labeled against a written guide, classified by gpt-4o-mini under two prompt versions. Results are reported on a frozen 20-ticket held-out set, with three repeats per version on that set.
 
 Accuracy rose from 80% to 95% on the held-out set, and one previously correct ticket failed in all three observed repeats. The aggregate score does not surface that; the per-case comparison does.
 
-All runs are saved. `case_study/rescore.py` recomputes every stored score from the saved responses, with no API key. See [case_study/README.md](case_study/README.md) for method, results and limitations.
+All runs are saved. `case_study/rescore.py` recomputes every stored score from the saved responses, with no API key. See [case_study/README.md](https://github.com/priteesshhh/evalquill/blob/v0.1.0/case_study/README.md) for method, results and limitations.
 
 ## What it doesn't do
 
@@ -229,7 +227,7 @@ uv run pytest
 
 ## Status
 
-Early. Not on PyPI yet, and the API may change before a first release.
+Early. 0.1.0 is the first release; the API may change in later 0.x releases.
 
 ## License
 
