@@ -7,15 +7,23 @@ on:
 
 jobs:
   test:
-    name: offline tests
+    name: offline tests (${{ matrix.python }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Supported floor (pyproject requires-python) and development version.
+        python: ["3.10", "3.14"]
+    env:
+      # uv otherwise follows .python-version (3.14) for every command.
+      UV_PYTHON: ${{ matrix.python }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version-file: ".python-version"
+          python-version: ${{ matrix.python }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
@@ -25,19 +33,28 @@ jobs:
       - name: Install the project
         run: uv sync --locked --dev
 
+      - name: Confirm interpreter version
+        run: uv run python -c "import sys; v = '.'.join(map(str, sys.version_info[:2])); assert v == '${{ matrix.python }}', f'expected ${{ matrix.python }}, got {v}'; print(sys.version)"
+
       - name: Run offline tests
         run: uv run pytest -v
 
   package:
-    name: wheel install
+    name: wheel install (${{ matrix.python }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.14"]
+    env:
+      UV_PYTHON: ${{ matrix.python }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version-file: ".python-version"
+          python-version: ${{ matrix.python }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
@@ -46,6 +63,9 @@ jobs:
 
       - name: Build
         run: uv build --no-sources
+
+      - name: Confirm interpreter version for installed package
+        run: uv run --isolated --no-project --with dist/*.whl python -c "import sys; v = '.'.join(map(str, sys.version_info[:2])); assert v == '${{ matrix.python }}', f'expected ${{ matrix.python }}, got {v}'; print(sys.version)"
 
       - name: Smoke test wheel
         run: uv run --isolated --no-project --with dist/*.whl tests/smoke.py
