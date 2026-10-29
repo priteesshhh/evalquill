@@ -52,22 +52,26 @@ classified from those substrings.
 
 ## CI and packaging
 
-Current: GitHub Actions run 35736820917 passed all four jobs for commit
-4a2e42d: offline tests and wheel install, each on Python 3.10 and 3.14. Each
-job asserts the interpreter it ran (3.10.21 and 3.14.7 in that run), so the
-matrix cannot silently fall back to a single version. The suite has 180
-offline tests, with 2 live tests deselected.
+Current: GitHub Actions run 40810449980 passed on main at commit 474715a,
+the released commit.
 
-Historical, 2026-09-17: run 35279309174 passed both jobs on ubuntu-latest.
+The workflow runs four jobs: offline tests and wheel install, each on Python
+3.10 and 3.14, the declared floor and the development version. Each job
+asserts the interpreter it actually ran, so the matrix cannot silently fall
+back to a single version; run 35736820917 recorded 3.10.21 and 3.14.7 across
+the four jobs. The suite has 180 offline tests, with 2 live tests deselected.
 
-offline tests: uv sync --locked --dev, then uv run pytest. 67 tests passed,
-2 live tests deselected. No extras installed, so this also confirms the core
-and the mocked adapter tests need no provider SDK.
+Historical, 2026-09-17: run 35279309174 passed both jobs on ubuntu-latest,
+when the suite had 67 offline tests and the workflow tested one Python
+version.
 
-wheel install: uv build --no-sources, then the smoke script run against both
-distributions via uv run --isolated --no-project. Both imported evalquill
-from site-packages under the runner cache, confirming no reliance on the
-source tree, an editable install, or PYTHONPATH.
+What the jobs do. offline tests: uv sync --locked --dev, then uv run pytest.
+No extras are installed, so this also confirms that the core and the mocked
+adapter tests need no provider SDK. wheel install: uv build --no-sources,
+then the smoke script run against both distributions via uv run --isolated
+--no-project; both import evalquill from site-packages under the runner
+cache, confirming no reliance on the source tree, an editable install, or
+PYTHONPATH.
 
 No API keys are present in CI and no live calls are made.
 
@@ -82,8 +86,37 @@ The demo in examples/prompt_change_demo.py uses stub LLMs and is synthetic.
 It illustrates the comparison workflow. It is not evidence about any real
 model's behaviour.
 
-## Release 0.1.0 - in preparation
+## Release 0.1.0 - published 2026-10-28
 
-Prepared on branch release/0.1.0 and not yet published. Pending: a
-TestPyPI upload and install, and a clean install on a second machine.
-The release tag will point to the commit that passes those checks.
+Published to PyPI: https://pypi.org/project/evalquill/0.1.0/
+
+One commit carries the whole chain. Tag v0.1.0, branch main, and the
+published distributions are all commit
+474715af81adc7191285e7a7ef150aa58e0f7f58.
+
+Artifacts, built with uv build --no-sources and uploaded unchanged:
+
+    8319c41492f78a37f09cb9dd5c6ed3c1f3692257e2c9873bdcf2435e3aba7b1d
+      evalquill-0.1.0-py3-none-any.whl
+    6693fd235d9e1efcc01f4f49059030d0802df84684fe7d01726b8c3497ebee33
+      evalquill-0.1.0.tar.gz
+
+The same hashes were recorded at build time on 2026-09-22 and re-checked
+before upload, so the published files are the ones that were validated.
+
+Before upload: twine check passed on both; metadata inspected (version,
+requires-python, MIT with LICENSE packaged, both extras, markdown README);
+each distribution installed separately into a clean Python 3.10 environment
+outside the repository, where the README quickstart produced its documented
+output.
+
+After upload: pip install evalquill into a fresh Python 3.10.12 environment
+outside the repository imported from site-packages, and the README quickstart
+again produced its documented output.
+
+TestPyPI was skipped deliberately. twine check had already applied the same
+long-description render check PyPI uses, and both distributions had been
+installed and exercised from disk, so a practice upload would have re-verified
+what was already verified.
+
+Not done: trials with developers other than the author.
